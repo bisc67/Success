@@ -1,0 +1,25 @@
+100 device$='flp1_'
+110 MODE 4:OPEN#3;con_444x200a32x16
+120 PAPER#3;0,2:CLS#3:CSIZE#3;2,1
+130 PAPER#3;4,6:INK#3;2
+140 PRINT#3;'      SUCCESS - CP/M Emulator        '
+150 CSIZE#3;0,0:INK#3;7:PAPER#3;0,2
+160 PRINT#3;'       Copyright 1988 Digital Precision. Author Brian Watson'
+170 CSIZE#3;1,0
+180 PAPER#3;2:INK#3;7
+190 PRINT#3;'  1. QL/Thor    (68000/8)            '
+200 PRINT#3;'  2. Thor-20/21 (68020)              '
+210 PRINT #3
+220 PRINT#3;'  Enter choice (1 or 2)';
+230 REPeat loop
+240 key$=INKEY$(#3,-1)
+250 IF key$='1' OR key$='2' THEN EXIT loop
+260 END REPeat loop
+265 PRINT #3;key$
+270 IF key$='1' THEN filename$='SUCCESS_68000_EXE'
+280 IF key$='2' THEN filename$='SUCCESS_68020_EXE'
+285 PRINT#3
+290 PRINT#3;'Press M for multitasking or any other key for speed'
+300 key$=INKEY$(#3,-1)
+305 CLS#3:PRINT#3;'Loading ';device$;filename$;'...'
+310 IF key$=='m' THEN EXEC device$&filename$ :ELSE EXEC_W device$&filename$
