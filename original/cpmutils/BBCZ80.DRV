@@ -1,0 +1,36 @@
+! Definition file for drive G: to work with
+! BBC Micro Z80 disks. The file assumes that
+! a double sided drive is being used, this will
+! not make any difference with single sided drives
+! except the capacity is different (this is not
+! checked when disk is being read)
+! Drive is configured for FLP2_
+!
+20		! SPT, (phys sec size/2)*NPS
+2		! BLS, Block size=2048 bytes
+127		! DSM, 128 directory entries max.
+192		! AL0, AL1 Allocation vector
+3		! OFF, 3 reserved tracks
+!
+! Raw definitions
+!
+2		! DRV, which drive to read from (FLP2)
+1		! PSS, Physical sector size
+10		! NPS, number of physical sectors
+80		! NPT, number of physical tracks
+0		! DSF, steps between sectors-1
+4		! FLG, side 2 track numbers are from 79-0
+!
+! Logical -> physical XLT table
+0
+1
+4
+5
+8
+9
+2
+3
+6
+7
+! End of file!!!!
+

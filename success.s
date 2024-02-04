@@ -560,7 +560,7 @@ ld_m_imm_with_offset
                 move.b      (a6)+, 0(a5,d0.l)
                 jmp         (a1)
 scf_instr:
-                bset      #0,d6
+                bset        #0,d6
                 jmp         (a1)
 add_hl_sp_instr:
                 move.l      a3,d0
@@ -1256,14 +1256,14 @@ and_l_instr:
                 jmp         (a1)
 and_m_instr:
                 beq.s     and_idx_instr
-                and.b     0(a5,d5.l),d7
+                and.b       0(a5,d5.l),d7
                 move.b    2(a2,d7.w),d6
                 jmp         (a1)
 and_idx_instr:
                 move.b      (a6)+,d0
                 ext.w       d0
                 add.w       d5,d0
-                and.b     0(a5,d0.l),d7
+                and.b       0(a5,d0.l),d7
                 move.b    2(a2,d7.w),d6
                 jmp         (a1)
 and_a_instr:
@@ -1390,14 +1390,14 @@ cp_l_instr:
                 jmp         (a1)
 cp_m_instr:
                 beq.s       cp_idx_instr
-                cmp.b     0(a5,d5.l),d7
+                cmp.b       0(a5,d5.l),d7
                 move        sr,d6
                 jmp         (a1)
 cp_idx_instr:
                 move.b      (a6)+,d0
                 ext.w       d0
                 add.w       d5,d0
-                cmp.b     0(a5,d0.l),d7
+                cmp.b       0(a5,d0.l),d7
                 move        sr,d6
                 jmp         (a1)
 cp_a_instr:
@@ -1856,8 +1856,7 @@ ld_ind_imm_hl_instr:
                 move.b      d5,(a0)+
                 move.b      (a4),(a0)
                 rts
-
-; this looks like a nibble flip. But must be something to do with flags (d6) and A (d7)
+; (hl)[7:4] -> (hl)[3:0]; (hl)[3:0] -> a[3:0]; a[3:0] -> (hl)[7:4]
 rrd_instr:
                 move.b      d7,d0                    
                 andi.b      #$f,d0                             ; Lower 4 bits of A
@@ -1889,6 +1888,7 @@ ld_hl_ind_imm_instr:
                 move.b      (a0),-(a4)
                 move.w      (a4)+,d5
                 rts
+; (hl)[7:4] <- (hl)[3:0]; (hl)[3:0] <- a[3:0]; a[3:0] <- (hl)[7:4]
 rld_instr:
                 move.b      d7,d0
                 andi.b      #$f,d0
@@ -1949,7 +1949,7 @@ ldi_instr:
                 subq.w       #1,d4
                 beq.s        ldi_done
                 bset         #1,d6
-ldi_done:      rts
+ldi_done:       rts
 cpi_instr:
                 cmp.b       0(a5,d5.l),d7
                 move        sr,d0
@@ -1963,7 +1963,7 @@ cpi_instr:
 cpi_done:       rts
 ini_instr:
                 moveq.l     #$1,d1
-ioid_common:   move.b       d4,d0
+ioid_common:    move.b      d4,d0
                 move.w      d3,reg_de(a4)
                 jsr         -$1000(a5)
                 clr.l       d3
@@ -1983,81 +1983,81 @@ ldd_instr:
                 bset        #1,d6
 ldd_done:       rts
 cpd_instr:
-                cmp.b     0(a5,d5.l),d7
+                cmp.b       0(a5,d5.l),d7
                 move        sr,d0
                 and.b       (a2),d6
                 andi.b      #$c,d0
-                or.b      d0,d6
+                or.b        d0,d6
                 subq.w      #1,d5
                 subq.w      #1,d4
                 beq.s       cpd_done
-                bset      #1,d6
+                bset        #1,d6
 cpd_done:       rts
 ind_instr:
                 moveq.l     #$1,d1
-inout_d:       move.b      d4,d0
+inout_d:        move.b      d4,d0
                 move.w      d3,reg_de(a4)
                 jsr         -$1000(a5)
                 clr.l       d3
                 move.w      reg_de(a4),d3
-                sub.w     #$100,d4
+                sub.w       #$100,d4
                 subq.w      #1,d5
                 rts
 outd_instr:
                 moveq.l     #$0,d1
-                bra.w     inout_d
+                bra.w       inout_d
 ldir_instr:
                 lea         0(a5,d5.l),a0
                 lea         0(a5,d3.l),a1
                 add.w       d4,d3
                 add.w       d4,d5
-ldir_next:     move.b      (a0)+,(a1)+
+ldir_next:      move.b      (a0)+,(a1)+
                 subq.w      #1,d4
-                bne.s     ldir_next
-                bclr      #1,d6
+                bne.s       ldir_next
+                bclr        #1,d6
                 clr.l       d4
-                lea       z80_exec_loop(pc),a1
+                lea         z80_exec_loop(pc),a1
                 rts
 cpir_instr:
-                bsr.w     cpi_instr
+                bsr.w       cpi_instr
                 move        d6,ccr
                 beq.s       cpir_done
-                btst      #1,d6
+                btst        #1,d6
                 bne.s       cpir_instr
-cpir_done:     rts
+cpir_done:      rts
 inir_instr:
-                bsr.w     ini_instr
+                bsr.w       ini_instr
                 move.w      d4,(a4)
                 tst.b       (a4)
-                bne.s     inir_instr
+                bne.s       inir_instr
                 rts
 otir_instr:
-                bsr.w     outi_instr
+                bsr.w       outi_instr
                 move.w      d4,(a4)
                 tst.b       (a4)
-                bne.s     otir_instr
+                bne.s       otir_instr
                 rts
 lddr_instr:
-                lea       1(a5,d5.l),a0
-                lea       1(a5,d3.l),a1
+                lea         1(a5,d5.l),a0
+                lea         1(a5,d3.l),a1
                 sub.w       d4,d3
                 sub.w       d4,d5
 lddr_next:
                 move.b      -(a0),-(a1)
                 subq.w      #1,d4
-                bne.w     lddr_next
-                bclr      #1,d6
+                bne.w       lddr_next
+                bclr        #1,d6
                 clr.l       d4
-                lea       z80_exec_loop(pc),a1
+                lea         z80_exec_loop(pc),a1
                 rts
 cpdr_instr:
                 bsr.w     cpd_instr
                 move        d6,ccr
                 beq.s       cpdr_done
-                btst      #1,d6
+                btst        #1,d6
                 bne.s       cpdr_instr
-cpdr_done:     rts
-indr_instr:    bsr.w     ind_instr
+cpdr_done:      rts
+indr_instr:     bsr.w     ind_instr
                 move.w      d4,(a4)
                 tst.b       (a4)
                 bne.s     indr_instr
@@ -2350,7 +2350,6 @@ sra_l_instr:
                 asr.b       #1,d5
                 move        sr,d6
                 jmp         (a1)
-;; Unknown, what would d0 be, Ah. An offset
 sra_m_instr:
                 move.b      0(a5,d0.l),d1
                 asr.b       #1,d1
@@ -2454,644 +2453,644 @@ srl_a_instr:
                 move        sr,d6
                 jmp         (a1)
 bit_0_b_instr:
-                btst      #8,d4
+                btst        #8,d4
                 move        sr,d6
                 jmp         (a1)
 bit_0_c_instr:
-                btst      #0,d4
+                btst        #0,d4
                 move        sr,d6
                 jmp         (a1)
 bit_0_d_instr:
-                btst      #8,d3
+                btst        #8,d3
                 move        sr,d6
                 jmp         (a1)
 bit_0_e_instr:
-                btst      #0,d3
+                btst        #0,d3
                 move        sr,d6
                 jmp         (a1)
 bit_0_h_instr:
-                btst      #8,d5
+                btst        #8,d5
                 move        sr,d6
                 jmp         (a1)
 bit_0_l_instr:
-                btst      #0,d5
+                btst        #0,d5
                 move        sr,d6
                 jmp         (a1)
 bit_0_m_instr:
-                btst      #0,0(a5,d0.l)
+                btst        #0,0(a5,d0.l)
                 move        sr,d6
                 jmp         (a1)
 bit_0_a_instr:
-                btst      #0,d7
+                btst        #0,d7
                 move        sr,d6
                 jmp         (a1)
 bit_1_b_instr:               
-                btst      #9,d4
+                btst        #9,d4
                 move        sr,d6
                 jmp         (a1)
 bit_1_c_instr:
-                btst      #1,d4
+                btst        #1,d4
                 move        sr,d6
                 jmp         (a1)
 bit_1_d_instr:
-                btst      #9,d3
+                btst        #9,d3
                 move        sr,d6
                 jmp         (a1)
 bit_1_e_instr:
-                btst      #1,d3
+                btst        #1,d3
                 move        sr,d6
                 jmp         (a1)
 bit_1_h_instr:
-                btst      #9,d5
+                btst        #9,d5
                 move        sr,d6
                 jmp         (a1)
 bit_1_l_instr:
-                btst      #1,d5
+                btst        #1,d5
                 move        sr,d6
                 jmp         (a1)
 bit_1_m_instr:
-                btst      #1,0(a5,d0.l)
+                btst        #1,0(a5,d0.l)
                 move        sr,d6
                 jmp         (a1)
 bit_1_a_instr:
-                btst      #1,d7
+                btst        #1,d7
                 move        sr,d6
                 jmp         (a1)
 bit_2_b_instr:
-                btst      #10,d4
+                btst        #10,d4
                 move        sr,d6
                 jmp         (a1)
 bit_2_c_instr:
-                btst      #2,d4
+                btst        #2,d4
                 move        sr,d6
                 jmp         (a1)
 bit_2_d_instr:
-                btst      #10,d3
+                btst        #10,d3
                 move        sr,d6
                 jmp         (a1)
 bit_2_e_instr:
-                btst      #2,d3
+                btst        #2,d3
                 move        sr,d6
                 jmp         (a1)
 bit_2_h_instr:
-                btst      #10,d5
+                btst        #10,d5
                 move        sr,d6
                 jmp         (a1)
 bit_2_l_instr:
-                btst      #2,d5
+                btst        #2,d5
                 move        sr,d6
                 jmp         (a1)
 bit_2_m_instr:
-                btst      #2,0(a5,d0.l)
+                btst        #2,0(a5,d0.l)
                 move        sr,d6
                 jmp         (a1)
 bit_2_a_instr:
-                btst      #2,d7
+                btst        #2,d7
                 move        sr,d6
                 jmp         (a1)
 bit_3_b_instr:
-                btst      #11,d4
+                btst        #11,d4
                 move        sr,d6
                 jmp         (a1)
 bit_3_c_instr:
-                btst      #3,d4
+                btst        #3,d4
                 move        sr,d6
                 jmp         (a1)
 bit_3_d_instr:
-                btst      #11,d3
+                btst        #11,d3
                 move        sr,d6
                 jmp         (a1)
 bit_3_e_instr:
-                btst      #3,d3
+                btst        #3,d3
                 move        sr,d6
                 jmp         (a1)
 bit_3_h_instr:
-                btst      #11,d5
+                btst        #11,d5
                 move        sr,d6
                 jmp         (a1)
 bit_3_l_instr:
-                btst      #3,d5
+                btst        #3,d5
                 move        sr,d6
                 jmp         (a1)
 bit_3_m_instr:
-                btst      #3,0(a5,d0.l)
+                btst        #3,0(a5,d0.l)
                 move        sr,d6
                 jmp         (a1)
 bit_3_a_instr:
-                btst      #3,d7
+                btst        #3,d7
                 move        sr,d6
                 jmp         (a1)
 bit_4_b_instr:
-                btst      #12,d4
+                btst        #12,d4
                 move        sr,d6
                 jmp         (a1)
 bit_4_c_instr:
-                btst      #4,d4
+                btst        #4,d4
                 move        sr,d6
                 jmp         (a1)
 bit_4_d_instr:
-                btst      #12,d3
+                btst        #12,d3
                 move        sr,d6
                 jmp         (a1)
 bit_4_e_instr:
-                btst      #4,d3
+                btst        #4,d3
                 move        sr,d6
                 jmp         (a1)
 bit_4_h_instr:
-                btst      #12,d5
+                btst        #12,d5
                 move        sr,d6
                 jmp         (a1)
 bit_4_l_instr:
-                btst      #4,d5
+                btst        #4,d5
                 move        sr,d6
                 jmp         (a1)
 bit_4_m_instr:
-                btst      #4,0(a5,d0.l)
+                btst        #4,0(a5,d0.l)
                 move        sr,d6
                 jmp         (a1)
 bit_4_a_instr:
-                btst      #4,d7
+                btst        #4,d7
                 move        sr,d6
                 jmp         (a1)
 bit_5_b_instr:
-                btst      #13,d4
+                btst        #13,d4
                 move        sr,d6
                 jmp         (a1)
 bit_5_c_instr:
-                btst      #5,d4
+                btst        #5,d4
                 move        sr,d6
                 jmp         (a1)
 bit_5_d_instr:
-                btst      #13,d3
+                btst        #13,d3
                 move        sr,d6
                 jmp         (a1)
 bit_5_e_instr:
-                btst      #5,d3
+                btst        #5,d3
                 move        sr,d6
                 jmp         (a1)
 bit_5_h_instr:
-                btst      #13,d5
+                btst        #13,d5
                 move        sr,d6
                 jmp         (a1)
 bit_5_l_instr:
-                btst      #5,d5
+                btst        #5,d5
                 move        sr,d6
                 jmp         (a1)
 bit_5_m_instr:
-                btst      #5,0(a5,d0.l)
+                btst        #5,0(a5,d0.l)
                 move        sr,d6
                 jmp         (a1)
 bit_5_a_instr:
-                btst      #5,d7
+                btst        #5,d7
                 move        sr,d6
                 jmp         (a1)
 bit_6_b_instr:
-                btst      #14,d4
+                btst        #14,d4
                 move        sr,d6
                 jmp         (a1)
 bit_6_c_instr:
-                btst      #6,d4
+                btst        #6,d4
                 move        sr,d6
                 jmp         (a1)
 bit_6_d_instr:
-                btst      #14,d3
+                btst        #14,d3
                 move        sr,d6
                 jmp         (a1)
 bit_6_e_instr:
-                btst      #6,d3
+                btst        #6,d3
                 move        sr,d6
                 jmp         (a1)
 bit_6_h_instr:
-                btst      #14,d5
+                btst        #14,d5
                 move        sr,d6
                 jmp         (a1)
 bit_6_l_instr:
-                btst      #6,d5
+                btst        #6,d5
                 move        sr,d6
                 jmp         (a1)
 bit_6_m_instr:
-                btst      #6,0(a5,d0.l)
+                btst        #6,0(a5,d0.l)
                 move        sr,d6
                 jmp         (a1)
 bit_6_a_instr:
-                btst      #6,d7
+                btst        #6,d7
                 move        sr,d6
                 jmp         (a1)
 bit_7_b_instr:
-                btst      #15,d4
+                btst        #15,d4
                 move        sr,d6
                 jmp         (a1)
 bit_7_c_instr:
-                btst      #7,d4
+                btst        #7,d4
                 move        sr,d6
                 jmp         (a1)
 bit_7_d_instr:
-                btst      #15,d3
+                btst        #15,d3
                 move        sr,d6
                 jmp         (a1)
 bit_7_e_instr:
-                btst      #7,d3
+                btst        #7,d3
                 move        sr,d6
                 jmp         (a1)
 bit_7_h_instr:
-                btst      #15,d5
+                btst        #15,d5
                 move        sr,d6
                 jmp         (a1)
 bit_7_l_instr:
-                btst      #7,d5
+                btst        #7,d5
                 move        sr,d6
                 jmp         (a1)
 bit_7_m_instr:
-                btst      #7,0(a5,d0.l)
+                btst        #7,0(a5,d0.l)
                 move        sr,d6
                 jmp         (a1)
 bit_7_a_instr:
-                btst      #7,d7
+                btst        #7,d7
                 move        sr,d6
                 jmp         (a1)
 res_0_b_instr:
-                bclr      #8,d4
+                bclr        #8,d4
                 jmp         (a1)
 res_0_c_instr:
-                bclr      #0,d4
+                bclr        #0,d4
                 jmp         (a1)
 res_0_d_instr:
-                bclr      #8,d3
+                bclr        #8,d3
                 jmp         (a1)
 res_0_e_instr:
-                bclr      #0,d3
+                bclr        #0,d3
                 jmp         (a1)
 res_0_h_instr:
-                bclr      #8,d5
+                bclr        #8,d5
                 jmp         (a1)
 res_0_l_instr:
-                bclr      #0,d5
+                bclr        #0,d5
                 jmp         (a1)
 res_0_m_instr:
-                bclr      #0,0(a5,d0.l)
+                bclr        #0,0(a5,d0.l)
                 jmp         (a1)
 res_0_a_instr:
-                bclr      #0,d7
+                bclr        #0,d7
                 jmp         (a1)
 res_1_b_instr:
-                bclr      #9,d4
+                bclr        #9,d4
                 jmp         (a1)
 res_1_c_instr:
-                bclr      #1,d4
+                bclr        #1,d4
                 jmp         (a1)
 res_1_d_instr:
-                bclr      #9,d3
+                bclr        #9,d3
                 jmp         (a1)
 res_1_e_instr:
-                bclr      #1,d3
+                bclr        #1,d3
                 jmp         (a1)
 res_1_h_instr:
-                bclr      #9,d5
+                bclr        #9,d5
                 jmp         (a1)
 res_1_l_instr:
-                bclr      #1,d5
+                bclr        #1,d5
                 jmp         (a1)
 res_1_m_instr:
-                bclr      #1,0(a5,d0.l)
+                bclr        #1,0(a5,d0.l)
                 jmp         (a1)
 res_1_a_instr:
-                bclr      #1,d7
+                bclr        #1,d7
                 jmp         (a1)
 res_2_b_instr:
-                bclr      #10,d4
+                bclr        #10,d4
                 jmp         (a1)
 res_2_c_instr:
-                bclr      #2,d4
+                bclr        #2,d4
                 jmp         (a1)
 res_2_d_instr:
-                bclr      #10,d3
+                bclr        #10,d3
                 jmp         (a1)
 res_2_e_instr:
-                bclr      #2,d3
+                bclr        #2,d3
                 jmp         (a1)
 res_2_h_instr:
-                bclr      #10,d5
+                bclr        #10,d5
                 jmp         (a1)
 res_2_l_instr:
-                bclr      #2,d5
+                bclr        #2,d5
                 jmp         (a1)
 res_2_m_instr:
-                bclr      #2,0(a5,d0.l)
+                bclr        #2,0(a5,d0.l)
                 jmp         (a1)
 res_2_a_instr:
-                bclr      #2,d7
+                bclr        #2,d7
                 jmp         (a1)
 res_3_b_instr:
-                bclr      #11,d4
+                bclr        #11,d4
                 jmp         (a1)
 res_3_c_instr:
-                bclr      #3,d4
+                bclr        #3,d4
                 jmp         (a1)
 res_3_d_instr:
-                bclr      #11,d3
+                bclr        #11,d3
                 jmp         (a1)
 res_3_e_instr:
-                bclr      #3,d3
+                bclr        #3,d3
                 jmp         (a1)
 res_3_h_instr:
-                bclr      #11,d5
+                bclr        #11,d5
                 jmp         (a1)
 res_3_l_instr:
-                bclr      #3,d5
+                bclr        #3,d5
                 jmp         (a1)
 res_3_m_instr:
-                bclr      #3,0(a5,d0.l)
+                bclr        #3,0(a5,d0.l)
                 jmp         (a1)
 res_3_a_instr:
-                bclr      #3,d7
+                bclr        #3,d7
                 jmp         (a1)
 res_4_b_instr:
-                bclr      #12,d4
+                bclr        #12,d4
                 jmp         (a1)
 res_4_c_instr:
-                bclr      #4,d4
+                bclr        #4,d4
                 jmp         (a1)
 res_4_d_instr:
-                bclr      #12,d3
+                bclr        #12,d3
                 jmp         (a1)
 res_4_e_instr:
-                bclr      #4,d3
+                bclr        #4,d3
                 jmp         (a1)
 res_4_h_instr:
-                bclr      #12,d5
+                bclr        #12,d5
                 jmp         (a1)
 res_4_l_instr:
-                bclr      #4,d5
+                bclr        #4,d5
                 jmp         (a1)
 res_4_m_instr:
-                bclr      #4,0(a5,d0.l)
+                bclr        #4,0(a5,d0.l)
                 jmp         (a1)
 res_4_a_instr:
-                bclr      #4,d7
+                bclr        #4,d7
                 jmp         (a1)
 res_5_b_instr:
-                bclr      #13,d4
+                bclr        #13,d4
                 jmp         (a1)
 res_5_c_instr:
-                bclr      #5,d4
+                bclr        #5,d4
                 jmp         (a1)
 res_5_d_instr:
-                bclr      #13,d3
+                bclr        #13,d3
                 jmp         (a1)
 res_5_e_instr:
-                bclr      #5,d3
+                bclr        #5,d3
                 jmp         (a1)
 res_5_h_instr:
-                bclr      #13,d5
+                bclr        #13,d5
                 jmp         (a1)
 res_5_l_instr:
-                bclr      #5,d5
+                bclr        #5,d5
                 jmp         (a1)
 res_5_m_instr:
-                bclr      #5,0(a5,d0.l)
+                bclr        #5,0(a5,d0.l)
                 jmp         (a1)
 res_5_a_instr:
-                bclr      #5,d7
+                bclr        #5,d7
                 jmp         (a1)
 res_6_b_instr:
-                bclr      #14,d4
+                bclr        #14,d4
                 jmp         (a1)
 res_6_c_instr:
-                bclr      #6,d4
+                bclr        #6,d4
                 jmp         (a1)
 res_6_d_instr:
-                bclr      #14,d3
+                bclr        #14,d3
                 jmp         (a1)
 res_6_e_instr:
-                bclr      #6,d3
+                bclr        #6,d3
                 jmp         (a1)
 res_6_h_instr:
-                bclr      #14,d5
+                bclr        #14,d5
                 jmp         (a1)
 res_6_l_instr:
-                bclr      #6,d5
+                bclr        #6,d5
                 jmp         (a1)
 res_6_m_instr:
-                bclr      #6,0(a5,d0.l)
+                bclr        #6,0(a5,d0.l)
                 jmp         (a1)
 res_6_a_instr:
-                bclr      #6,d7
+                bclr        #6,d7
                 jmp         (a1)
 res_7_b_instr:
-                bclr      #15,d4
+                bclr        #15,d4
                 jmp         (a1)
 res_7_c_instr:
-                bclr      #7,d4
+                bclr        #7,d4
                 jmp         (a1)
 res_7_d_instr:
-                bclr      #15,d3
+                bclr        #15,d3
                 jmp         (a1)
 res_7_e_instr:
-                bclr      #7,d3
+                bclr        #7,d3
                 jmp         (a1)
 res_7_h_instr:
-                bclr      #15,d5
+                bclr        #15,d5
                 jmp         (a1)
 res_7_l_instr:
-                bclr      #7,d5
+                bclr        #7,d5
                 jmp         (a1)
 res_7_m_instr:
-                bclr      #7,0(a5,d0.l)
+                bclr        #7,0(a5,d0.l)
                 jmp         (a1)
 res_7_a_instr:
-                bclr      #7,d7
+                bclr        #7,d7
                 jmp         (a1)
 set_0_b_instr:
-                bset      #8,d4
+                bset        #8,d4
                 jmp         (a1)
 set_0_c_instr:
-                bset      #0,d4
+                bset        #0,d4
                 jmp         (a1)
 set_0_d_instr:
-                bset      #8,d3
+                bset        #8,d3
                 jmp         (a1)
 set_0_e_instr:
-                bset      #0,d3
+                bset        #0,d3
                 jmp         (a1)
 set_0_h_instr:
-                bset      #8,d5
+                bset        #8,d5
                 jmp         (a1)
 set_0_l_instr:
-                bset      #0,d5
+                bset        #0,d5
                 jmp         (a1)
 set_0_m_instr:
-                bset      #0,0(a5,d0.l)
+                bset        #0,0(a5,d0.l)
                 jmp         (a1)
 set_0_a_instr:
-                bset      #0,d7
+                bset        #0,d7
                 jmp         (a1)
 set_1_b_instr:
-                bset      #9,d4
+                bset        #9,d4
                 jmp         (a1)
 set_1_c_instr:
-                bset      #1,d4
+                bset        #1,d4
                 jmp         (a1)
 set_1_d_instr:
-                bset      #9,d3
+                bset        #9,d3
                 jmp         (a1)
 set_1_e_instr:
-              bset      #1,d3
+              bset        #1,d3
                 jmp         (a1)
 set_1_h_instr:
-                bset      #9,d5
+                bset        #9,d5
                 jmp         (a1)
 set_1_l_instr:
-                bset      #1,d5
+                bset        #1,d5
                 jmp         (a1)
 set_1_m_instr:
-                bset      #1,0(a5,d0.l)
+                bset        #1,0(a5,d0.l)
                 jmp         (a1)
 set_1_a_instr:
-                bset      #1,d7
+                bset        #1,d7
                 jmp         (a1)
 set_2_b_instr:
-                bset      #10,d4
+                bset        #10,d4
                 jmp         (a1)
 set_2_c_instr:
-                bset      #2,d4
+                bset        #2,d4
                 jmp         (a1)
 set_2_d_instr:
-                bset      #10,d3
+                bset        #10,d3
                 jmp         (a1)
 set_2_e_instr:
-                bset      #2,d3
+                bset        #2,d3
                 jmp         (a1)
 set_2_h_instr:
-                bset      #10,d5
+                bset        #10,d5
                 jmp         (a1)
 set_2_l_instr:
-                bset      #2,d5
+                bset        #2,d5
                 jmp         (a1)
 set_2_m_instr:
-                bset      #2,0(a5,d0.l)
+                bset        #2,0(a5,d0.l)
                 jmp         (a1)
 set_2_a_instr:
-                bset      #2,d7
+                bset        #2,d7
                 jmp         (a1)
 set_3_b_instr:
-                bset      #11,d4
+                bset        #11,d4
                 jmp         (a1)
 set_3_c_instr:
-                bset      #3,d4
+                bset        #3,d4
                 jmp         (a1)
 set_3_d_instr:
-                bset      #11,d3
+                bset        #11,d3
                 jmp         (a1)
 set_3_e_instr:
-                bset      #3,d3
+                bset        #3,d3
                 jmp         (a1)
 set_3_h_instr:
-                bset      #11,d5
+                bset        #11,d5
                 jmp         (a1)
 set_3_l_instr:
-                bset      #3,d5
+                bset        #3,d5
                 jmp         (a1)
 set_3_m_instr:
-                bset      #3,0(a5,d0.l)
+                bset        #3,0(a5,d0.l)
                 jmp         (a1)
 set_3_a_instr:
-                bset      #3,d7
+                bset        #3,d7
                 jmp         (a1)
 set_4_b_instr:
-                bset      #12,d4
+                bset        #12,d4
                 jmp         (a1)
 set_4_c_instr:
-                bset      #4,d4
+                bset        #4,d4
                 jmp         (a1)
 set_4_d_instr:
-                bset      #12,d3
+                bset        #12,d3
                 jmp         (a1)
 set_4_e_instr:
-                bset      #4,d3
+                bset        #4,d3
                 jmp         (a1)
 set_4_h_instr:
-                bset      #12,d5
+                bset        #12,d5
                 jmp         (a1)
 set_4_l_instr:
-                bset      #4,d5
+                bset        #4,d5
                 jmp         (a1)
 set_4_m_instr:
-                bset      #4,0(a5,d0.l)
+                bset        #4,0(a5,d0.l)
                 jmp         (a1)
 set_4_a_instr:
-                bset      #4,d7
+                bset        #4,d7
                 jmp         (a1)
 set_5_b_instr:
-                bset      #13,d4
+                bset        #13,d4
                 jmp         (a1)
 set_5_c_instr:
-                bset      #5,d4
+                bset        #5,d4
                 jmp         (a1)
 set_5_d_instr:
-                bset      #13,d3
+                bset        #13,d3
                 jmp         (a1)
 set_5_e_instr:
-                bset      #5,d3
+                bset        #5,d3
                 jmp         (a1)
 set_5_h_instr:
-                bset      #13,d5
+                bset        #13,d5
                 jmp         (a1)
 set_5_l_instr:
-                bset      #5,d5
+                bset        #5,d5
                 jmp         (a1)
 set_5_m_instr:
-                bset      #5,0(a5,d0.l)
+                bset        #5,0(a5,d0.l)
                 jmp         (a1)
 set_5_a_instr:
-                bset      #5,d7
+                bset        #5,d7
                 jmp         (a1)
 set_6_b_instr:
-                bset      #14,d4
+                bset        #14,d4
                 jmp         (a1)
 set_6_c_instr:
-                bset      #6,d4
+                bset        #6,d4
                 jmp         (a1)
 set_6_d_instr:
-                bset      #14,d3
+                bset        #14,d3
                 jmp         (a1)
 set_6_e_instr:
-                bset      #6,d3
+                bset        #6,d3
                 jmp         (a1)
 set_6_h_instr:
-                bset      #14,d5
+                bset        #14,d5
                 jmp         (a1)
 set_6_l_instr:
-                bset      #6,d5
+                bset        #6,d5
                 jmp         (a1)
 set_6_m_instr:
-                bset      #6,0(a5,d0.l)
+                bset        #6,0(a5,d0.l)
                 jmp         (a1)
 set_6_a_instr:
-                bset      #6,d7
+                bset        #6,d7
                 jmp         (a1)
 set_7_b_instr:
-                bset      #15,d4
+                bset        #15,d4
                 jmp         (a1)
 set_7_c_instr:
-                bset      #7,d4
+                bset        #7,d4
                 jmp         (a1)
 set_7_d_instr:
-                bset      #15,d3
+                bset        #15,d3
                 jmp         (a1)
 set_7_e_instr:
-                bset      #7,d3
+                bset        #7,d3
                 jmp         (a1)
 set_7_h_instr:
-                bset      #15,d5
+                bset        #15,d5
                 jmp         (a1)
 set_7_l_instr:
-                bset      #7,d5
+                bset        #7,d5
                 jmp         (a1)
 set_7_m_instr:
-                bset      #7,0(a5,d0.l)
+                bset        #7,0(a5,d0.l)
                 jmp         (a1)
 set_7_a_instr:
-                bset      #7,d7
+                bset        #7,d7
                 jmp         (a1)
 not_implemented:
                 movem.l   d0-d3/a0-a1,-(sp)
@@ -3213,13 +3212,14 @@ flag_table:
                 dc.b        $08,$0a,$0a,$08,$0a,$08,$08,$0a,$0a,$08,$08,$0a,$08,$0a,$0a,$08
                 dc.b        $0a,$08,$08,$0a,$08,$0a,$0a,$08,$08,$0a,$0a,$08,$0a,$08,$08,$0a               
 ;; Each entry is offset from dispatch_cb_group. This is different to how the main z80 instructions 
-;; are handled. I have no idea why this is different.
+;; are handled. I have no idea why this is different. Probably "just because" one was implemented
+;; much later than the other.
+;
+; I never really liked intels use of 'm' to refer to (hl), but it makes sense here and makes the symbols more consistent.
+;
 dispatch_cb_group:
 cbg:
                 ; Shift operations
-                ; I've got a bad feeling sra and srl were flipped in the original implementation. This is
-                ; correct below, as per https://clrhome.org/table/
-                ; sla and sla behavior, as described is opposite of expected.
                 dc.w        rlc_b_instr-cbg,rlc_c_instr-cbg,rlc_d_instr-cbg,rlc_e_instr-cbg,rlc_h_instr-cbg,rlc_l_instr-cbg,rlc_m_instr-cbg,rlc_a_instr-cbg
                 dc.w        rrc_b_instr-cbg,rrc_c_instr-cbg,rrc_d_instr-cbg,rrc_e_instr-cbg,rrc_h_instr-cbg,rrc_l_instr-cbg,rrc_m_instr-cbg,rrc_a_instr-cbg
                 dc.w        rl_b_instr-cbg,rl_c_instr-cbg,rl_d_instr-cbg,rl_e_instr-cbg,rl_h_instr-cbg,rl_l_instr-cbg,rl_m_instr-cbg,rl_a_instr-cbg
@@ -3275,12 +3275,12 @@ out_c_0_instr:
 
                 dc.w        in_b_c_instr-edg,out_c_b_instr-edg,sbc_hl_bc_instr-edg,ld_ind_imm_bc_instr-edg,neg_instr-edg,retn_instr-edg,im0_instr-edg,ld_i_a_instr-edg  ; $40-$47
                 dc.w        in_c_c_instr-edg,out_c_c_instr-edg,adc_hl_bc_instr-edg,ld_bc_ind_imm_instr-edg,$0000,reti_instr-edg,$0000,ld_r_a_instr-edg              ; $48-$4f
-                dc.w        in_d_c_instr-edg,out_c_d_instr-edg,sbc_hl_de_instr-edg,ld_ind_imm_de_instr-edg,$0000,$0000,im1_instr-edg,ld_a_i_instr-edg                   ; $50-$57
-                dc.w        in_e_c_instr-edg,out_c_e_instr-edg,adc_hl_de_instr-edg,ld_de_ind_imm_instr-edg,$0000,$0000,im2_instr-edg,ld_a_r_instr-edg                             ; $58-$5f
+                dc.w        in_d_c_instr-edg,out_c_d_instr-edg,sbc_hl_de_instr-edg,ld_ind_imm_de_instr-edg,$0000,$0000,im1_instr-edg,ld_a_i_instr-edg               ; $50-$57
+                dc.w        in_e_c_instr-edg,out_c_e_instr-edg,adc_hl_de_instr-edg,ld_de_ind_imm_instr-edg,$0000,$0000,im2_instr-edg,ld_a_r_instr-edg               ; $58-$5f
                 dc.w        in_h_c_instr-edg,out_c_h_instr-edg,sbc_hl_hl_instr-edg,ld_ind_imm_hl_instr-edg,$0000,$0000,$0000,rrd_instr-edg                          ; $60-$67
-                dc.w        in_l_c_instr-edg,out_c_l_instr-edg,adc_hl_hl_instr-edg,ld_hl_ind_imm_instr-edg,$0000,$0000,$0000,rld_instr-edg                                ; $68-$6f
-                dc.w        $0000,$0000,sbc_hl_sp_instr-edg,ld_ind_imm_sp_instr-edg,$0000,$0000,$0000,$0000                                    ; $70-$77
-                dc.w        in_a_c_instr-edg,out_c_a_instr-edg,adc_hl_sp_instr-edg,ld_sp_ind_imm_instr-edg,$0000,$0000,$0000,$0000                                        ; $78-$7f
+                dc.w        in_l_c_instr-edg,out_c_l_instr-edg,adc_hl_hl_instr-edg,ld_hl_ind_imm_instr-edg,$0000,$0000,$0000,rld_instr-edg                          ; $68-$6f
+                dc.w        $0000,$0000,sbc_hl_sp_instr-edg,ld_ind_imm_sp_instr-edg,$0000,$0000,$0000,$0000                                                         ; $70-$77
+                dc.w        in_a_c_instr-edg,out_c_a_instr-edg,adc_hl_sp_instr-edg,ld_sp_ind_imm_instr-edg,$0000,$0000,$0000,$0000                                  ; $78-$7f
 
                 dc.w        $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000                                                                                         ; $80-$87
                 dc.w        $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000                                                                                         ; $88-$8f

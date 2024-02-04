@@ -126,7 +126,7 @@ b_e8:
                 bsr         open_system_disk
                 tst.l       d5
                 beq.w       not_system_disk
-                move.l      flp_handle(a4),a0           ; offset 0x18
+                move.l      flp_handle(a4),a0 
                 move.l      a5,a1
                 add.l       #$d400,a1
                 move.l      a1,a6
@@ -516,12 +516,12 @@ open_system_disk:
                 move.w      (a0),(a1)+
                 move.w      #$000d,(a0)+
                 move.l      a0,-(sp)
-                move.l      #$464c5031,(a0)+            ; 'FLP1'
+                move.l      #$'FLP1',(a0)+
                 move.l      (a0),(a1)+
-                move.l      #$5f43504d,(a0)+            ; '_CPM'
+                move.l      #'_FPM',(a0)+
                 move.w      (a0),(a1)+
-                move.l      #$46494c45,(a0)+            ; 'FILE'
-                move.b      #$53,(a0)                   ; 'S'
+                move.l      #'FILE',(a0)+
+                move.b      #'S',(a0)
                 move.b      cache_flags(a4),(a1)
                 move.l      (sp)+,a0
                 bclr        #0,cache_flags(a4)
@@ -530,27 +530,27 @@ open_system_disk:
                 move.l      (a1)+,(a0)
                 move.b      d4,d1
                 cmpi.b      #$2,d1
-                bcs.l       b_65c
+                bcs.l       set_drive_and_activate
                 move.l      (a1)+,(a0)
-                ;; Uses the short form, original assembler used long-form. sub.b       #$2,d1
-                dc.w        $0401,$0002         ; This is long-form subi.b #$0002,d1
+                subi.b      #$2,d1
                 cmpi.b      #$2,d1
-                bcs.w       b_65c
+                bcs.w       set_drive_and_activate
                 move.l      (a1)+,(a0)
-                ;; Uses the short form, original assembler used long-form. sub.b       #$2,d1
-                dc.w        $0401,$0002         ; This is long-form subi.b #$0002,d1
+                subi.b      #$2,d1
                 cmpi.b      #$2,d1
-                bcs.l       b_65c
-                ;; Uses the short form, original assembler used long-form. sub.b       #$2,d1
-                dc.w        $0401,$0002         ; This is long-form subi.b #$0002,d1
+                bcs.l       set_drive_and_activate
+                subi.b      #$2,d1
                 cmpi.b      #$1,d1
                 bcc.w       copy_name_and_open
                 ; Special filename that will allow us to access a disk raw.
-
+                ; Filename 'FLPn_*Dsd' where:
+                ; n - drive index
+                ; s - sector size                       ; 0=128,1=256,2=512,3=1024
+                ; d - density                           ; S=single density, D=double density
                 move.w      #$0009,-2(a0)
-                move.l      #$464c5032,(a0)         ; 'FLP2'
-                move.l      #$5f2a4432,4(a0)        ; '_*D2'
-                move.b      #$44,8(a0)              ; 'D'
+                move.l      #'FLP2',(a0)
+                move.l      #'_*D2',4(a0)
+                move.b      #'D',8(a0)
                 clr.l       d0
                 move.l      a5,a1
                 move.w      active_dpb(a4),d0
@@ -562,18 +562,18 @@ open_system_disk:
                 move.b      d0,3(a0)                    ; Replace '2' above with proper drive index
                 move.b      1(a1),d0                    ; Disk number?
                 add.b       #$30,d0
-                move.b      d0,7(a0)
+                move.b      d0,7(a0)                    ; Set sector size
                 move.b      #'S',d0
                 btst        #0,5(a1)
                 beq.s       single_density
                 move.b      #'D',d0
 single_density:
-                move.b      d0,8(a0)
+                move.b      d0,8(a0)                    ; Set density
                 bset        #0,cache_flags(a4)
                 bra.s       activate_disk
 ;
 ; I don't think this is right.
-b_65c:
+set_drive_and_activate:
                 add.b       #'1',d1
                 move.b      d1,3(a0)
 activate_disk:
