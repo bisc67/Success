@@ -14,7 +14,8 @@ TRAP_STRM      equ      3
 ;
 MT_CJOB         equ     1
 MT_IPCOM        equ     $11
-MT_BAUD         equ     $12
+MT_BAUD         equ         $12
+MT_RCLCK        equ         $13
 ;
 ; IO(#2) functions
 ;
@@ -31,6 +32,7 @@ IO_FSTRG        equ     3
 IO_SBYTE        equ     5
 IO_SSTRG        equ     7
 SD_CHENQ        equ     $0b
+SD_BORDR        equ     $0c
 SD_CURENA       equ     $0e
 SD_CURS         equ     $0f
 SD_POS          equ     $10
@@ -49,17 +51,23 @@ SD_CLRRT        equ     $24
 SD_SETPA        equ     $27
 SD_SETST        equ     $28
 SD_SETIN        equ     $29
+SD_SETFL        equ     $2a
 SD_SETUL        equ     $2b
+SD_SETSZ        equ     $2d
 FS_POSAB        equ     $42
 IO_FBYTE        equ     1
 IO_SSTRG        equ     7
 ;
 ; Fixed vectors
 ;
-IO_QTEST        equ     $00de
-IO_QOUT         equ     $00e0
-;
+UT_ERR          equ         $00cc
+UT_MINT         equ         $00ce
+UT_MTEXT        equ         $00d0
+IO_QTEST        equ         $00de
+IO_QOUT         equ         $00e0
+CN_DATE         equ         $00ec
 ; System variables
 ;
-SV_KEYQ        equ      $2804c
-SV_CQCH        equ      $28092
+SV_SCRST        equ         $28033
+SV_KEYQ         equ         $2804c
+SV_CQCH         equ         $28092
