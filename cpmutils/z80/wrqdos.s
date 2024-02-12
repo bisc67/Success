@@ -29,8 +29,8 @@ find_next_param:
         JP         Z,remove_leading_spaces
         INC        B
         LD         A,B
-        LD         (name_buffer+1),A
-        LD         DE,name_buffer+2
+        LD         (qdos_name_buffer+1),A
+        LD         DE,qdos_name_buffer+2
 why_not_ldir:
         LD         A,(HL)
         LD         (DE),A
@@ -45,7 +45,7 @@ why_not_ldir:
         CALL       bdos
         INC        A
         JP         Z,file_not_found
-        LD         HL,name_buffer
+        LD         HL,qdos_name_buffer
         LD         A,0x2                            ; QDOS open new
         OUT        (17),A
         AND        A
@@ -121,23 +121,25 @@ write_error:
         LD         DE,error_while_writing_msg
         JP         write_message_and_exit
 invalid_param_msg:
-        ds         "Incorrect command format, WRQDOS <cpmname> <qdosname>$"
+        db         "Incorrect command format, WRQDOS <cpmname> <qdosname>$"
 cannot_open_file_msg:
-        ds         "Cannot open QDOS file, check name with a CAT$"
+        db         "Cannot open QDOS file, check name with a CAT$"
 error_while_writing_msg:
-        ds         "Error during writing the QDOS file$"
+        db         "Error during writing the QDOS file$"
 file_not_found_msg:
-        ds         "CP/M format file does not exist$"
+        db         "CP/M format file does not exist$"
 copy_complete_msg:
-        ds         "Single file copy complete.$"
+        db         "Single file copy complete.$"
 directory_full_msg:
-        ds         "CP/M disk or directory is full$"
+        db         "CP/M disk or directory is full$"
 signon:
-        ds         "CP/M to QDOS file copier vers 1.0\r\n"
-        ds         "By B. Watson, (C) 1987 Digital Precision\r\n\r\n$"
-        char       '\0'
+        db         "CP/M to QDOS file copier vers 1.0",10,13
+        db         "By B. Watson, (C) 1987 Digital Precision",10,13,"$"
+        db         0
 
-name_buffer:
-        defw       0,0,'e','>','$'
-        ds         "Cannot open QDOS file, check name"
+        db         0
+        db         0
+qdos_name_buffer:
+        ds         39,0
 file_buffer:
+

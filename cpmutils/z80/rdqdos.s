@@ -94,7 +94,7 @@ write_next_buffer:
 write_message_and_exit:
         LD         C,c_writestr
         CALL       bdos
-        JP         RST0
+        JP         0
 write_buffer:
         LD         DE,file_buffer+1
         LD         A,(file_buffer)
@@ -144,21 +144,20 @@ disk_full:
         LD         DE,disk_full_msg
         JP         write_message_and_exit
 invalid_param_msg:
-        ds         "Incorrect command format, RDQDOS <cpmname> <qdosname>$"
+        db         "Incorrect command format, RDQDOS <cpmname> <qdosname>$"
 cannot_open_qdos_msg:
-        ds         "Cannot open QDOS file, check name with a CAT$"
+        db         "Cannot open QDOS file, check name with a CAT$"
 file_exists_msg:
-        ds         "CP/M file already exists, or name ambiguous$"
+        db         "CP/M file already exists, or name ambiguous$"
 cannot_create_cpm_msg:
-        ds         "Cannot open CP/M file, check disk for R/O or space$"
+        db         "Cannot open CP/M file, check disk for R/O or space$"
 copy_complete_msg:
-        ds         "Single file copy complete.$"
+        db         "Single file copy complete.$"
 disk_full_msg:
-        ds         "CP/M disk or directory is full$"
+        db         "CP/M disk or directory is full$"
 signon:
-        ds         "QDOS to CP/M file copier vers 1.0\r\n"
-        ds         "By B. Watson (C) 1987 Digital Precision\r\n\r\n$"
-        char       '\0'
+        db         "QDOS to CP/M file copier vers 1.0",10,13
+        db         "By B. Watson (C) 1987 Digital Precision",10,13,10,13,"$"
 qdos_name_buffer:
-        defs       38,0 
+        ds         38,0
 file_buffer:
